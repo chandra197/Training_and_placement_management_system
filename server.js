@@ -24,6 +24,134 @@ const pool = mysql.createPool({
   queueLimit: 0,
 });
 
+// Endpoint to fetch eligible students
+app.get("/api/students/eligible", async (req, res) => {
+  try {
+    const {
+      batchYear,
+      semester,
+      year,
+      branch,
+      minCgpa,
+      minInter,
+      minTenth,
+      maxBacklogs,
+    } = req.query;
+
+    const [students] = await pool.execute(
+      `
+      SELECT 
+        hall_ticket_number,
+        name,
+        branch,
+        section,
+        cgpa,
+        inter_percentage,
+        tenth_percentage,
+        backlogs,
+        gender,
+        date_of_birth,
+        email,
+        phone
+      FROM students 
+      WHERE batch_year = ?
+        AND semester = ?
+        AND year = ?
+        AND branch = ?
+        AND cgpa >= ?
+        AND inter_percentage >= ?
+        AND tenth_percentage >= ?
+        AND backlogs <= ?
+      ORDER BY hall_ticket_number
+    `,
+      [
+        batchYear,
+        semester,
+        year,
+        branch,
+        minCgpa,
+        minInter,
+        minTenth,
+        maxBacklogs,
+      ]
+    );
+
+    res.json(students);
+  } catch (error) {
+    console.error("Error fetching eligible students:", error);
+    res.status(500).json({ error: "Internal server error" });
+  }
+});
+
+// Daily Attendance Report
+app.get("/api/reports/attendance/daily", async (req, res) => {
+  try {
+    const { date, branch } = req.query;
+
+    const [absentees] = await pool.execute(
+      `
+      SELECT DISTINCT 
+        s.hall_ticket_number,
+        s.name,
+        s.year,
+        s.section,
+        ts.date,
+        ts.start_time,
+        ts.end_time
+      FROM students s
+      JOIN attendance a ON s.id = a.student_id
+      JOIN training_sessions ts ON a.session_id = ts.id
+      WHERE ts.date = ?
+      AND ts.branch = ?
+      AND a.status = 'absent'
+      ORDER BY s.year, s.section, s.hall_ticket_number
+    `,
+      [date, branch]
+    );
+
+    res.json(absentees);
+  } catch (error) {
+    console.error("Error fetching daily attendance report:", error);
+    res.status(500).json({ error: "Internal server error" });
+  }
+});
+
+// Weekly Attendance Report
+app.get("/api/reports/attendance/weekly", async (req, res) => {
+  try {
+    const { startDate, endDate, batchYear, year, branch, semester } = req.query;
+
+    const [absentees] = await pool.execute(
+      `
+      SELECT DISTINCT 
+        s.hall_ticket_number,
+        s.name,
+        s.year,
+        s.section,
+        ts.date,
+        ts.start_time,
+        ts.end_time
+      FROM students s
+      JOIN attendance a ON s.id = a.student_id
+      JOIN training_sessions ts ON a.session_id = ts.id
+      WHERE ts.date BETWEEN ? AND ?
+      AND ts.batch_year = ?
+      AND ts.year = ?
+      AND ts.branch = ?
+      AND ts.semester = ?
+      AND a.status = 'absent'
+      ORDER BY s.year, s.section, ts.date, s.hall_ticket_number
+    `,
+      [startDate, endDate, batchYear, year, branch, semester]
+    );
+
+    res.json(absentees);
+  } catch (error) {
+    console.error("Error fetching weekly attendance report:", error);
+    res.status(500).json({ error: "Internal server error" });
+  }
+});
+
 // Student Profile Endpoints
 app.get("/api/students/search", async (req, res) => {
   try {
