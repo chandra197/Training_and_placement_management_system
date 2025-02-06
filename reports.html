@@ -6,6 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <link rel="stylesheet" href="/css/common.css" />
     <link rel="stylesheet" href="/css/reports.css" />
+    <script src="https://cdn.sheetjs.com/xlsx-0.18.5/package/dist/xlsx.full.min.js"></script>
     <script type="module" src="/js/reports.js"></script>
   </head>
   <body>
@@ -20,72 +21,373 @@
       </div>
     </nav>
 
-    <main class="main-content">
-      <div class="report-filters">
-        <div class="form-group">
-          <label for="report-year">Year</label>
-          <select id="report-year">
-            <option value="">All Years</option>
-            <option value="1">1st Year</option>
-            <option value="2">2nd Year</option>
-            <option value="3">3rd Year</option>
-            <option value="4">4th Year</option>
-          </select>
-        </div>
-        <div class="form-group">
-          <label for="report-branch">Branch</label>
-          <select id="report-branch">
-            <option value="">All Branches</option>
-            <option value="CSE">CSE</option>
-            <option value="ECE">ECE</option>
-            <option value="EEE">EEE</option>
-            <option value="MECH">MECH</option>
-          </select>
-        </div>
-        <div class="form-group">
-          <label for="report-section">Section</label>
-          <select id="report-section">
-            <option value="">All Sections</option>
-            <option value="A">A</option>
-            <option value="B">B</option>
-            <option value="C">C</option>
-          </select>
-        </div>
-      </div>
+    <div class="main-container">
+      <aside class="sidebar">
+        <ul class="sidebar-nav">
+          <li>
+            <a href="#" data-section="overview" class="active">Overview</a>
+          </li>
+          <li>
+            <a href="#" data-section="eligibility">Student Eligibility</a>
+          </li>
+          <li><a href="#" data-section="attendance">Attendance Reports</a></li>
+        </ul>
+      </aside>
 
-      <div class="report-summary">
-        <div class="summary-card">
-          <h3>Total Students</h3>
-          <div class="value">198</div>
-        </div>
-        <div class="summary-card">
-          <h3>Average Attendance</h3>
-          <div class="value">85%</div>
-        </div>
-        <div class="summary-card">
-          <h3>Training Sessions</h3>
-          <div class="value">24</div>
-        </div>
-      </div>
+      <main class="main-content">
+        <!-- Overview Section -->
+        <section id="overview-section" class="report-section">
+          <div class="report-filters">
+            <div class="form-group">
+              <label for="report-year">Year</label>
+              <select id="report-year">
+                <option value="">All Years</option>
+                <option value="1">1st Year</option>
+                <option value="2">2nd Year</option>
+                <option value="3">3rd Year</option>
+                <option value="4">4th Year</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label for="report-branch">Branch</label>
+              <select id="report-branch">
+                <option value="">All Branches</option>
+                <option value="CSE">CSE</option>
+                <option value="ECE">ECE</option>
+                <option value="EEE">EEE</option>
+                <option value="MECH">MECH</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label for="report-section">Section</label>
+              <select id="report-section">
+                <option value="">All Sections</option>
+                <option value="A">A</option>
+                <option value="B">B</option>
+                <option value="C">C</option>
+              </select>
+            </div>
+          </div>
 
-      <div class="report-container">
-        <h2>Attendance Report</h2>
-        <table class="report-table">
-          <thead>
-            <tr>
-              <th>Roll Number</th>
-              <th>Name</th>
-              <th>Year</th>
-              <th>Branch</th>
-              <th>Section</th>
-              <th>Attendance %</th>
-            </tr>
-          </thead>
-          <tbody id="report-data">
-            <!-- Data will be populated by JavaScript -->
-          </tbody>
-        </table>
-      </div>
-    </main>
+          <div class="report-summary">
+            <div class="summary-card">
+              <h3>Total Students</h3>
+              <div class="value">198</div>
+            </div>
+            <div class="summary-card">
+              <h3>Average Attendance</h3>
+              <div class="value">85%</div>
+            </div>
+            <div class="summary-card">
+              <h3>Training Sessions</h3>
+              <div class="value">24</div>
+            </div>
+          </div>
+
+          <div class="report-container">
+            <h2>Attendance Report</h2>
+            <table class="report-table">
+              <thead>
+                <tr>
+                  <th>Roll Number</th>
+                  <th>Name</th>
+                  <th>Year</th>
+                  <th>Branch</th>
+                  <th>Section</th>
+                  <th>Attendance %</th>
+                </tr>
+              </thead>
+              <tbody id="report-data">
+                <!-- Data will be populated by JavaScript -->
+              </tbody>
+            </table>
+          </div>
+        </section>
+
+        <!-- Eligibility Section -->
+        <section
+          id="eligibility-section"
+          class="report-section"
+          style="display: none"
+        >
+          <div class="section-selector">
+            <h2>Student Eligibility Report</h2>
+            <div class="form-row">
+              <div class="form-group">
+                <label for="batch-year">Batch Year</label>
+                <input
+                  type="number"
+                  id="batch-year"
+                  min="2020"
+                  max="2030"
+                  placeholder="e.g., 2025"
+                />
+              </div>
+              <div class="form-group">
+                <label for="semester">Semester</label>
+                <select id="semester">
+                  <option value="">Select Semester</option>
+                  <option value="odd">Odd</option>
+                  <option value="even">Even</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label for="year">Current Year</label>
+                <select id="year">
+                  <option value="">Select Year</option>
+                  <option value="1">1st Year</option>
+                  <option value="2">2nd Year</option>
+                  <option value="3">3rd Year</option>
+                  <option value="4">4th Year</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label for="branch">Branch</label>
+                <select id="branch">
+                  <option value="">Select Branch</option>
+                  <option value="CSE">CSE</option>
+                  <option value="ECE">ECE</option>
+                  <option value="EEE">EEE</option>
+                  <option value="MECH">MECH</option>
+                </select>
+              </div>
+            </div>
+            <div class="form-row">
+              <div class="form-group">
+                <label for="min-cgpa">Minimum CGPA</label>
+                <input
+                  type="number"
+                  id="min-cgpa"
+                  min="0"
+                  max="10"
+                  step="0.01"
+                  placeholder="e.g., 7.5"
+                />
+              </div>
+              <div class="form-group">
+                <label for="min-inter">Minimum Inter %</label>
+                <input
+                  type="number"
+                  id="min-inter"
+                  min="0"
+                  max="100"
+                  step="0.01"
+                  placeholder="e.g., 60"
+                />
+              </div>
+              <div class="form-group">
+                <label for="min-tenth">Minimum 10th %</label>
+                <input
+                  type="number"
+                  id="min-tenth"
+                  min="0"
+                  max="100"
+                  step="0.01"
+                  placeholder="e.g., 60"
+                />
+              </div>
+              <div class="form-group">
+                <label for="max-backlogs">Maximum Backlogs</label>
+                <input type="number" id="max-backlogs" min="0" value="0" />
+              </div>
+            </div>
+            <div class="button-group">
+              <button id="generate-report" class="btn primary">
+                Generate Report
+              </button>
+              <button id="download-excel" class="btn success" disabled>
+                Download Excel
+              </button>
+            </div>
+          </div>
+
+          <div
+            id="eligibility-results"
+            class="report-container"
+            style="display: none"
+          >
+            <div class="table-wrapper">
+              <table class="report-table">
+                <thead>
+                  <tr>
+                    <th>Hall Ticket Number</th>
+                    <th>Name</th>
+                    <th>Branch & Section</th>
+                    <th>CGPA</th>
+                    <th>Inter %</th>
+                    <th>10th %</th>
+                    <th>Backlogs</th>
+                    <th>Gender</th>
+                    <th>Date of Birth</th>
+                    <th>Email</th>
+                    <th>Phone</th>
+                  </tr>
+                </thead>
+                <tbody id="eligible-students"></tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+
+        <!-- Attendance Section -->
+        <!-- Replace the attendance-section in reports.html with this content -->
+        <section
+          id="attendance-section"
+          class="report-section"
+          style="display: none"
+        >
+          <div class="report-tabs">
+            <button class="tab-button active" data-tab="daily">
+              Daily Reports
+            </button>
+            <button class="tab-button" data-tab="weekly">Weekly Reports</button>
+          </div>
+
+          <!-- Daily Reports Tab -->
+          <div id="daily-tab" class="tab-content active">
+            <div class="section-selector">
+              <h2>Daily Attendance Report</h2>
+              <div class="form-row">
+                <div class="form-group">
+                  <label for="daily-date">Date</label>
+                  <input type="date" id="daily-date" required />
+                </div>
+                <div class="form-group">
+                  <label for="daily-branch">Branch</label>
+                  <select id="daily-branch" required>
+                    <option value="">Select Branch</option>
+                    <option value="CSE">CSE</option>
+                    <option value="ECE">ECE</option>
+                    <option value="EEE">EEE</option>
+                    <option value="MECH">MECH</option>
+                  </select>
+                </div>
+              </div>
+              <div class="button-group">
+                <button id="generate-daily-report" class="btn primary">
+                  Generate Report
+                </button>
+                <button id="download-daily-report" class="btn success" disabled>
+                  Download Report
+                </button>
+              </div>
+            </div>
+
+            <div
+              id="daily-results"
+              class="report-container"
+              style="display: none"
+            >
+              <div class="table-wrapper">
+                <table class="report-table">
+                  <thead>
+                    <tr>
+                      <th>Hall Ticket Number</th>
+                      <th>Name</th>
+                      <th>Year</th>
+                      <th>Section</th>
+                      <th>Session Time</th>
+                    </tr>
+                  </thead>
+                  <tbody id="daily-absentees"></tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+
+          <!-- Weekly Reports Tab -->
+          <div id="weekly-tab" class="tab-content">
+            <div class="section-selector">
+              <h2>Weekly Attendance Report</h2>
+              <div class="form-row">
+                <div class="form-group">
+                  <label for="weekly-batch-year">Batch Year</label>
+                  <input
+                    type="number"
+                    id="weekly-batch-year"
+                    min="2020"
+                    max="2030"
+                    placeholder="e.g., 2025"
+                    required
+                  />
+                </div>
+                <div class="form-group">
+                  <label for="weekly-year">Year</label>
+                  <select id="weekly-year" required>
+                    <option value="">Select Year</option>
+                    <option value="1">1st Year</option>
+                    <option value="2">2nd Year</option>
+                    <option value="3">3rd Year</option>
+                    <option value="4">4th Year</option>
+                  </select>
+                </div>
+                <div class="form-group">
+                  <label for="weekly-branch">Branch</label>
+                  <select id="weekly-branch" required>
+                    <option value="">Select Branch</option>
+                    <option value="CSE">CSE</option>
+                    <option value="ECE">ECE</option>
+                    <option value="EEE">EEE</option>
+                    <option value="MECH">MECH</option>
+                  </select>
+                </div>
+                <div class="form-group">
+                  <label for="weekly-semester">Semester</label>
+                  <select id="weekly-semester" required>
+                    <option value="">Select Semester</option>
+                    <option value="odd">Odd</option>
+                    <option value="even">Even</option>
+                  </select>
+                </div>
+              </div>
+              <div class="form-row">
+                <div class="form-group">
+                  <label for="weekly-start-date">Start Date</label>
+                  <input type="date" id="weekly-start-date" required />
+                </div>
+                <div class="form-group">
+                  <label for="weekly-end-date">End Date</label>
+                  <input type="date" id="weekly-end-date" required />
+                </div>
+              </div>
+              <div class="button-group">
+                <button id="generate-weekly-report" class="btn primary">
+                  Generate Report
+                </button>
+                <button
+                  id="download-weekly-report"
+                  class="btn success"
+                  disabled
+                >
+                  Download Report
+                </button>
+              </div>
+            </div>
+
+            <div
+              id="weekly-results"
+              class="report-container"
+              style="display: none"
+            >
+              <div class="table-wrapper">
+                <table class="report-table">
+                  <thead>
+                    <tr>
+                      <th>Hall Ticket Number</th>
+                      <th>Name</th>
+                      <th>Year</th>
+                      <th>Section</th>
+                      <th>Date</th>
+                      <th>Session Time</th>
+                    </tr>
+                  </thead>
+                  <tbody id="weekly-absentees"></tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </section>
+      </main>
+    </div>
   </body>
 </html>
